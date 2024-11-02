@@ -1,0 +1,228 @@
+#include <vector>
+#include <algorithm>
+#include <climits>
+
+class Solution {
+public:
+    int maximumGap(std::vector<int>& nums) {
+        int n = nums.size(); // n = 4
+        if (n < 2) return 0;  // Not the case here, continue
+
+        int maxi = *max_element(nums.begin(), nums.end());  // maxi = 9
+        int mini = *min_element(nums.begin(), nums.end());  // mini = 1
+
+        // All elements are the same, gap is zero
+        if (maxi == mini) return 0;  // Not the case here, continue
+
+        // Initialize buckets to store the min and max for each bucket
+        std::vector<int> bucketLargest(n, INT_MIN); // bucketLargest = {INT_MIN, INT_MIN, INT_MIN, INT_MIN}
+        std::vector<int> bucketSmallest(n, INT_MAX); // bucketSmallest = {INT_MAX, INT_MAX, INT_MAX, INT_MAX}
+
+        // Place elements in buckets
+        for (int num : nums) {
+            int index = (num - mini) * (n - 1) / (maxi - mini);  // Calculate bucket index
+            // Process each element in nums
+
+            // num = 3
+            // index = (3 - 1) * (4 - 1) / (9 - 1) = 2 * 3 / 8 = 0
+            bucketLargest[0] = std::max(bucketLargest[0], 3);  // bucketLargest = {3, INT_MIN, INT_MIN, INT_MIN}
+            bucketSmallest[0] = std::min(bucketSmallest[0], 3);  // bucketSmallest = {3, INT_MAX, INT_MAX, INT_MAX}
+
+            // num = 6
+            // index = (6 - 1) * (4 - 1) / (9 - 1) = 5 * 3 / 8 = 1
+            bucketLargest[1] = std::max(bucketLargest[1], 6);  // bucketLargest = {3, 6, INT_MIN, INT_MIN}
+            bucketSmallest[1] = std::min(bucketSmallest[1], 6);  // bucketSmallest = {3, 6, INT_MAX, INT_MAX}
+
+            // num = 9
+            // index = (9 - 1) * (4 - 1) / (9 - 1) = 8 * 3 / 8 = 3
+            bucketLargest[3] = std::max(bucketLargest[3], 9);  // bucketLargest = {3, 6, INT_MIN, 9}
+            bucketSmallest[3] = std::min(bucketSmallest[3], 9);  // bucketSmallest = {3, 6, INT_MAX, 9}
+
+            // num = 1
+            // index = (1 - 1) * (4 - 1) / (9 - 1) = 0 * 3 / 8 = 0
+            bucketLargest[0] = std::max(bucketLargest[0], 1);  // bucketLargest remains {3, 6, INT_MIN, 9}
+            bucketSmallest[0] = std::min(bucketSmallest[0], 1);  // bucketSmallest = {1, 6, INT_MAX, 9}
+        }
+
+        // After the bucket filling loop:
+        // bucketLargest = {3, 6, INT_MIN, 9}
+        // bucketSmallest = {1, 6, INT_MAX, 9}
+
+        // Calculate the maximum gap
+        int maxGap = 0;
+        int prevBucketMax = mini;  // prevBucketMax = 1
+
+        for (int i = 0; i < n; ++i) {
+            // Skip empty buckets
+            if (bucketSmallest[i] == INT_MAX) continue;
+
+            // Update the maximum gap
+            maxGap = std::max(maxGap, bucketSmallest[i] - prevBucketMax);
+            prevBucketMax = bucketLargest[i];  // Update previous bucket's max
+        }
+
+        return maxGap;
+    }
+};
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+We want to find the **maximum difference** (gap) between any two **consecutive numbers** in the sorted version of the array.
+
+Given input:
+```cpp
+nums = {3, 6, 9, 1}
+```
+
+If we sorted this array, it would look like:
+```
+sorted_nums = {1, 3, 6, 9}
+```
+
+The maximum gap between consecutive numbers here is:
+- between `1` and `3`: gap = 2
+- between `3` and `6`: gap = 3
+- between `6` and `9`: gap = 3
+
+So, the maximum gap is `3`.
+
+---
+
+### Step-by-Step Explanation of the Code
+
+1. **Handle Edge Cases**
+
+   ```cpp
+   int n = nums.size();
+   if (n < 2) return 0;
+   ```
+
+   - If the array has fewer than 2 elements, there’s no "gap" to calculate. 
+   - So if `n < 2`, we return `0`.
+
+2. **Find Minimum and Maximum Values**
+
+   ```cpp
+   int maxi = *max_element(nums.begin(), nums.end());
+   int mini = *min_element(nums.begin(), nums.end());
+   ```
+
+   - We need the smallest (`mini`) and largest (`maxi`) values in `nums` to calculate how we’ll split the range of values.
+   - For our example, `mini = 1` and `maxi = 9`.
+
+3. **Check if All Elements are the Same**
+
+   ```cpp
+   if (maxi == mini) return 0;
+   ```
+
+   - If `maxi` and `mini` are the same, all elements are identical. So, there’s no gap.
+   - In our example, `maxi` and `mini` are different, so we continue.
+
+4. **Set Up Buckets for Minimum and Maximum Values**
+
+   We create two arrays to store the smallest and largest elements for each "bucket" we’ll define.
+
+   ```cpp
+   std::vector<int> bucketLargest(n, INT_MIN);
+   std::vector<int> bucketSmallest(n, INT_MAX);
+   ```
+
+   - `bucketLargest` stores the largest element in each bucket.
+   - `bucketSmallest` stores the smallest element in each bucket.
+   - Initially, `bucketLargest` is filled with `INT_MIN` and `bucketSmallest` with `INT_MAX` (placeholders).
+   - For `n = 4`, we’ll have 4 buckets: `[INT_MIN, INT_MIN, INT_MIN, INT_MIN]` and `[INT_MAX, INT_MAX, INT_MAX, INT_MAX]`.
+
+5. **Determine Bucket Index for Each Number**
+
+   ```cpp
+   int index = (num - mini) * (n - 1) / (maxi - mini);
+   ```
+
+   - This formula calculates which bucket each `num` should go into.
+   - It maps `num` from the range `[mini, maxi]` to the bucket range `[0, n - 1]`.
+
+   For each number in `nums`:
+   - **`num = 3`**:
+     ```cpp
+     index = (3 - 1) * (4 - 1) / (9 - 1) = 2 * 3 / 8 = 0
+     ```
+     - So, `3` goes into bucket `0`.
+     - Update `bucketLargest[0] = max(INT_MIN, 3) = 3`
+     - Update `bucketSmallest[0] = min(INT_MAX, 3) = 3`
+
+   - **`num = 6`**:
+     ```cpp
+     index = (6 - 1) * (4 - 1) / (9 - 1) = 5 * 3 / 8 = 1
+     ```
+     - `6` goes into bucket `1`.
+     - Update `bucketLargest[1] = max(INT_MIN, 6) = 6`
+     - Update `bucketSmallest[1] = min(INT_MAX, 6) = 6`
+
+   - **`num = 9`**:
+     ```cpp
+     index = (9 - 1) * (4 - 1) / (9 - 1) = 8 * 3 / 8 = 3
+     ```
+     - `9` goes into bucket `3`.
+     - Update `bucketLargest[3] = max(INT_MIN, 9) = 9`
+     - Update `bucketSmallest[3] = min(INT_MAX, 9) = 9`
+
+   - **`num = 1`**:
+     ```cpp
+     index = (1 - 1) * (4 - 1) / (9 - 1) = 0 * 3 / 8 = 0
+     ```
+     - `1` goes into bucket `0`.
+     - Update `bucketLargest[0] = max(3, 1) = 3`
+     - Update `bucketSmallest[0] = min(3, 1) = 1`
+
+   After this loop, the buckets look like this:
+   ```
+   bucketLargest = {3, 6, INT_MIN, 9}
+   bucketSmallest = {1, 6, INT_MAX, 9}
+   ```
+
+6. **Calculate Maximum Gap**
+
+   ```cpp
+   int maxGap = 0;
+   int prevBucketMax = mini;
+   ```
+
+   - `maxGap` will store the maximum gap found.
+   - `prevBucketMax` keeps track of the maximum value in the last non-empty bucket.
+
+   Loop through each bucket:
+   
+   - **Bucket 0**:
+     - `bucketSmallest[0] = 1`, `bucketLargest[0] = 3`
+     - Update `maxGap = max(0, 1 - 1) = 0`
+     - `prevBucketMax = 3`
+
+   - **Bucket 1**:
+     - `bucketSmallest[1] = 6`, `bucketLargest[1] = 6`
+     - Calculate `maxGap = max(0, 6 - 3) = 3`
+     - `prevBucketMax = 6`
+
+   - **Bucket 2**:
+     - Skip this bucket since `bucketSmallest[2] = INT_MAX` (empty).
+
+   - **Bucket 3**:
+     - `bucketSmallest[3] = 9`, `bucketLargest[3] = 9`
+     - Calculate `maxGap = max(3, 9 - 6) = 3`
+
+7. **Return Result**
+
+   ```cpp
+   return maxGap;  // maxGap = 3
+   ```
+
+   The function returns `3` as the maximum gap.
+
+---
+
+### Summary
+
+- We use **buckets** to avoid sorting the array, which is slower.
+- We distribute elements into **buckets** based on their value range.
+- Finally, we calculate the **maximum gap** by looking at gaps between the end of one bucket and the start of the next non-empty bucket.
+
+In this example, the **maximum gap** is `3`.
