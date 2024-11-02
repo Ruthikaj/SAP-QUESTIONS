@@ -1,0 +1,151 @@
+class Solution
+{
+    public:
+    //Function to find the maximum occurring character in a string.
+    char getMaxOccuringChar(string str)
+    {
+         unordered_map<char,int>mp;
+        for(char x: str){
+            mp[x]++;
+        }
+        
+        int maxFreq = 0;
+        char maxFreqChar = '\0';
+        
+        for(const auto& entry : mp){
+            if(entry.second > maxFreq || (entry.second == maxFreq and entry.first < maxFreqChar)){
+                maxFreq = entry.second;
+                maxFreqChar = entry.first;
+            }
+        }
+        
+        return maxFreqChar;
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Certainly! Let's break down the loop that processes each entry in the character frequency map (`mp`) with an example and dry run. This will help clarify how the maximum frequency character is determined, especially handling ties.
+
+### Code Segment
+
+Here's the code segment you want to focus on:
+
+```cpp
+for (const auto& entry : mp) { // For each entry in the map (character and its frequency)
+    // Check if this character has a higher frequency or is lexicographically smaller in case of a tie
+    if (entry.second > maxFreq || (entry.second == maxFreq && entry.first < maxFreqChar)) {
+        maxFreq = entry.second; // Update maximum frequency
+        maxFreqChar = entry.first; // Update the character with maximum frequency
+    }
+}
+```
+
+### Dry Run Example
+
+We'll use the string `"abccba"` to perform a dry run.
+
+1. **Initial Setup**:
+   - After processing the string, the frequency map (`mp`) will look like this:
+     ```
+     mp = {
+         'a': 2,
+         'b': 2,
+         'c': 2
+     }
+     ```
+   - Initialize:
+     ```cpp
+     int maxFreq = 0; // The maximum frequency found so far
+     char maxFreqChar = '\0'; // The character corresponding to maxFreq
+     ```
+
+2. **Dry Run Through the Loop**:
+   - We will iterate over each entry in the frequency map `mp`.
+
+#### Iteration 1: Entry = `{'a', 2}`
+- **Entry Details**:
+  - `entry.first = 'a'` (character)
+  - `entry.second = 2` (frequency)
+- **Condition Check**:
+  ```cpp
+  if (entry.second > maxFreq || (entry.second == maxFreq && entry.first < maxFreqChar)) {
+      // Check: 2 > 0  --> true
+  }
+  ```
+- **Action**:
+  - Since the condition is `true`, we update:
+    ```cpp
+    maxFreq = 2; // Now, maxFreq is 2
+    maxFreqChar = 'a'; // Now, maxFreqChar is 'a'
+    ```
+
+#### Iteration 2: Entry = `{'b', 2}`
+- **Entry Details**:
+  - `entry.first = 'b'`
+  - `entry.second = 2`
+- **Condition Check**:
+  ```cpp
+  if (entry.second > maxFreq || (entry.second == maxFreq && entry.first < maxFreqChar)) {
+      // Check: 2 > 2 --> false
+      // Check: 2 == 2 and 'b' < 'a' --> false
+  }
+  ```
+- **Action**:
+  - Since the condition is `false`, no updates are made. 
+  - State remains: `maxFreq = 2`, `maxFreqChar = 'a'`.
+
+#### Iteration 3: Entry = `{'c', 2}`
+- **Entry Details**:
+  - `entry.first = 'c'`
+  - `entry.second = 2`
+- **Condition Check**:
+  ```cpp
+  if (entry.second > maxFreq || (entry.second == maxFreq && entry.first < maxFreqChar)) {
+      // Check: 2 > 2 --> false
+      // Check: 2 == 2 and 'c' < 'a' --> false
+  }
+  ```
+- **Action**:
+  - The condition is `false`, so no updates are made again.
+  - Final state remains: `maxFreq = 2`, `maxFreqChar = 'a'`.
+
+### Conclusion After Loop Execution
+At the end of the loop, we have:
+- `maxFreq = 2` (the highest frequency of any character)
+- `maxFreqChar = 'a'` (the character with that highest frequency, which was the lexicographically smallest among the candidates).
+
+### Summary of the Loop's Logic
+- The loop iterates through each character-frequency pair in the `mp`.
+- It checks if the current character's frequency (`entry.second`) is greater than `maxFreq`. If so, it updates both `maxFreq` and `maxFreqChar`.
+- If the frequency is equal to `maxFreq`, it checks if the current character (`entry.first`) is lexicographically smaller than `maxFreqChar`. If so, it updates `maxFreqChar`.
+
+This process ensures that we find the character that appears most frequently, resolving ties in favor of the lexicographically smaller character. 
+
+Let me know if you have any further questions or need additional clarification!
